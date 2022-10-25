@@ -1,0 +1,10 @@
+#drawingPanel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #acacac;
+}
+
+#pixels {
+    margin-bottom: 2rem;
+}
