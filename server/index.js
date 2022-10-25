@@ -1,10 +1,10 @@
 const express = require("express");
-const app = express();
 const path = require('path');
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 
+const app = express();
 app.use(cors());
 app.use(express.static(path.join(__dirname, '/public')));
 
@@ -46,6 +46,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(8080, () => {
+server.listen(443, () => {
   console.log("SERVER IS RUNNING");
 });
