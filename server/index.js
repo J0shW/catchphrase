@@ -12,7 +12,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://local]host:3000", "https://catchphrase-649dd.web.app"],
     methods: ["GET", "POST"],
   },
 });
