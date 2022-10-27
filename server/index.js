@@ -64,6 +64,31 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("start_timer", (roomCode) => {
+    let room = roomList.find((room) => room.code === roomCode);
+    if (room) {
+      room.turn.phrase = newWord();
+      room.timerDate = Date.now();
+      console.log('timer started', room);
+      io.to(roomCode).emit('room_updated', room);
+    }
+  });
+
+  socket.on("end_timer", (roomCode) => {
+    let room = roomList.find((room) => room.code === roomCode);
+    if (room) {
+      if (room.turn.team === 1) {
+        room.teamTwoScore = room.teamTwoScore + 1;
+      } else {
+        room.teamOneScore = room.teamOneScore + 1;
+      }
+
+      room.timerDate = undefined;
+      console.log('timer ended', room);
+      io.to(roomCode).emit('room_updated', room);
+    }
+  });
+
   socket.on("skip", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room) {
@@ -74,7 +99,7 @@ io.on("connection", (socket) => {
 
   socket.on("next_turn", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
-    if (room) {
+    if (room && room.teamOne.length > 0 && room.teamTwo.length > 0) {
       const teamOneIndex = room.teamOne.findIndex((player) => player.name === room.turn.player);
       const teamTwoIndex = room.teamTwo.findIndex((player) => player.name === room.turn.player);
       if (teamOneIndex >=0) {
@@ -104,8 +129,12 @@ io.on("connection", (socket) => {
     if (!room) {
       room = {
         code: roomCode,
+        hostPlayer: name,
         teamOne: [],
         teamTwo: [],
+        teamOneScore: 0,
+        teamTwoScore: 0,
+        timerDate: undefined,
         turn: {team: 1, player: name, phrase: newWord()}
       }
       roomList = [...roomList, room];
