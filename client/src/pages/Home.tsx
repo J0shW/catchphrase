@@ -62,7 +62,7 @@ const Home: React.FC<IProps> = (props: IProps) => {
 					Join Room
 				</Button>
 				<h5 className="w-100 text-center mt-2 text-muted">- OR -</h5>
-				<Button className="w-100" variant="primary" type="button" onClick={createRoom} disabled={name === ""}>
+				<Button className="w-100" variant="primary" type="button" onClick={createRoom} disabled={name === "" || roomCode !== ""}>
 					Create Room
 				</Button>
 			</Form>

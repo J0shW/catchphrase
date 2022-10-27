@@ -1,6 +1,10 @@
 interface Room {
-	id: string;
 	code: string;
-	teamOne: string[];
-	teamTwo: string[];
+	teamOne: Player[];
+	teamTwo: Player[];
+}
+
+interface Player {
+	name: string;
+	id: string;
 }

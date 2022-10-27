@@ -48,7 +48,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 					<h5>Team One</h5>
 					<ListGroup>
 						{props.room?.teamOne.map((player) =>
-							<ListGroup.Item>{player}</ListGroup.Item>
+							<ListGroup.Item>{player.name}</ListGroup.Item>
 						)}
 					</ListGroup>
 				</Col>
@@ -56,7 +56,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 					<h5>Team Two</h5>
 					<ListGroup>
 						{props.room?.teamTwo.map((player) =>
-							<ListGroup.Item>{player}</ListGroup.Item>
+							<ListGroup.Item>{player.name}</ListGroup.Item>
 						)}
 					</ListGroup>
 				</Col>

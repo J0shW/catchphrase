@@ -38,42 +38,51 @@ io.on("connection", (socket) => {
     socket.leave(roomCode);
     socket.emit('room_left');
 
-    const roomIndex = roomList.find((room) => room.code === roomCode);
+    const roomIndex = roomList.findIndex((room) => room.code === roomCode);
+    console.log('roomIndex', roomIndex);
     if (roomIndex >= 0) {
-      const teamOneIndex = roomList[roomIndex].teamOne.find((id === socket.id));
+      console.log('socket.id', socket.id);
+      const teamOneIndex = roomList[roomIndex].teamOne.findIndex((player) => player.id === socket.id);
+      console.log('teamOneIndex', teamOneIndex);
       if (teamOneIndex >= 0) {
         roomList[roomIndex].teamOne.splice(teamOneIndex, 1);
         console.log(roomList);
         io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
       }
-      const teamTwoIndex = roomList[roomIndex].teamTwo.find((id === socket.id));
+      const teamTwoIndex = roomList[roomIndex].teamTwo.findIndex((player) => player.id === socket.id);
       if (teamTwoIndex >= 0) {
         roomList[roomIndex].teamTwo.splice(teamTwoIndex, 1);
         console.log(roomList);
         io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
+      }
+      // remove room if its now empty
+      if (roomList[roomIndex].teamOne.length === 0 && roomList[roomIndex].teamTwo.length === 0) {
+        roomList.splice(roomIndex, 1);
+        console.log('roomList', roomList);
       }
     }
   });
 
   const handleJoinRoom = (name, roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
+    console.log('roomFound', room);
     if (!room) {
       room = {
-        id: socket.id,
         code: roomCode,
         teamOne: [],
         teamTwo: [],
       }
+      roomList = [...roomList, room];
     }
 
-    if (room.teamOne.length === room.teamTwo.length) {
-      room.teamOne.push(name);
+    if (room.teamOne.length <= room.teamTwo.length) {
+      room.teamOne.push({name, id: socket.id});
     } else {
-      room.teamTwo.push(name);
+      room.teamTwo.push({name, id: socket.id});
     }
     
     socket.join(roomCode);
-    roomList = [...roomList, room];
+    
     console.log('updated room list:', roomList)
     io.to(roomCode).emit('room_updated', room);
   }
