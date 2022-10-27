@@ -88,7 +88,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	}, [props.room]);
 
 	const currentPlayer = props.room?.turn.player;
-	const isHost = currentPlayer === props.room?.hostPlayer;
+	const isHost = props.name === props.room?.hostPlayer;
 	const isRoundStarted = props.room?.timerDate !== undefined;
 	const isMyTurn = currentPlayer === props.name;
 	const isTeamOne = props.room?.teamOne && props.room.teamOne.findIndex((player) => player.name === props.name) >= 0;
