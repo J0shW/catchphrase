@@ -21,6 +21,14 @@ const Game: React.FC<IProps> = (props: IProps) => {
 		socket.emit("next_phrase", props.room?.code);
 	}, [props.room]);
 
+	const skip = useCallback(() => {
+		socket.emit("skip", props.room?.code);
+	}, [props.room]);
+
+	const nextTurn = useCallback(() => {
+		socket.emit("next_turn", props.room?.code);
+	}, [props.room]);
+
 	useEffect(() => {
 		socket.on("room_left", () => props.setRoom(undefined));
 
@@ -78,10 +86,10 @@ const Game: React.FC<IProps> = (props: IProps) => {
 					<p className="text-center text-muted">Category: {props.room?.turn.phrase.category}</p>
 
 					<div className="d-flex justify-content-center mt-2">
-						<Button className="me-2" variant="success" type="button" onClick={leaveRoom} disabled={props.room === undefined}>
+						<Button className="me-2" variant="success" type="button" onClick={nextTurn} disabled={props.room === undefined}>
 							Got it!
 						</Button>
-						<Button className="" variant="secondary" type="button" onClick={leaveRoom} disabled={props.room === undefined}>
+						<Button className="" variant="secondary" type="button" onClick={skip} disabled={props.room === undefined}>
 							Skip
 						</Button>
 					</div>

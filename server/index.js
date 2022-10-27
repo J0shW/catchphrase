@@ -64,6 +64,40 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("skip", (roomCode) => {
+    let room = roomList.find((room) => room.code === roomCode);
+    if (room) {
+      room.turn.phrase = newWord();
+      io.to(roomCode).emit('room_updated', room);
+    }
+  });
+
+  socket.on("next_turn", (roomCode) => {
+    let room = roomList.find((room) => room.code === roomCode);
+    if (room) {
+      const teamOneIndex = room.teamOne.findIndex((player) => player.name === room.turn.player);
+      const teamTwoIndex = room.teamTwo.findIndex((player) => player.name === room.turn.player);
+      if (teamOneIndex >=0) {
+        if (teamOneIndex >= room.teamTwo.length) {
+          room.turn.player = room.teamTwo[0].name;
+        } else {
+          room.turn.player = room.teamTwo[teamOneIndex].name;
+        }
+      } else if (teamTwoIndex >=0) {
+        if (teamTwoIndex + 1 >= room.teamOne.length) {
+          room.turn.player = room.teamOne[0].name;
+        } else {
+          room.turn.player = room.teamOne[teamTwoIndex + 1].name;
+        }
+      }
+
+      room.turn.team = room.turn.team === 1 ? 2 : 1;
+      room.turn.phrase = newWord();
+      console.log('turn', room.turn)
+      io.to(roomCode).emit('room_updated', room);
+    }
+  });
+
   const handleJoinRoom = (name, roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     console.log('roomFound', room);
