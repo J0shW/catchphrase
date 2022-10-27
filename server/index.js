@@ -18,6 +18,7 @@ const io = new Server(server, {
 });
 
 let roomList = [];
+const database = require('./database.json');
 
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
@@ -71,6 +72,7 @@ io.on("connection", (socket) => {
         code: roomCode,
         teamOne: [],
         teamTwo: [],
+        turn: {team: 1, player: name, phrase: newWord()}
       }
       roomList = [...roomList, room];
     }
@@ -91,6 +93,15 @@ io.on("connection", (socket) => {
 server.listen(443, () => {
   console.log("SERVER IS RUNNING");
 });
+
+function newWord() {
+  const wordCount = database.words.length;
+  console.log('wordCount', wordCount);
+
+  const wordIndex = Math.floor(Math.random() * wordCount);
+  console.log('word', database.words[wordIndex])
+  return database.words[wordIndex];
+}
 
 function makeCode(length) {
   var result           = '';

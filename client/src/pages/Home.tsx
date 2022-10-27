@@ -6,23 +6,24 @@ import { Form, Button, Container } from 'react-bootstrap';
 interface IProps {
   	room?: Room;
 	setRoom: (room: Room | undefined) => void;
+	name?: string;
+	setName: (name: string) => void;
 }
 
 const Home: React.FC<IProps> = (props: IProps) => {
 	const socket = useContext(SocketContext);
 	const navigate = useNavigate();
 
-	const [name, setName] = useState("");
 	const [roomCode, setRoomCode] = useState("");
 
 	const joinRoom = useCallback(() => {
-		console.log('roomCode', {name, roomCode})
-		socket.emit("join_room", {name, roomCode});
-	}, [name, roomCode]);
+		console.log('roomCode', {name: props.name, roomCode})
+		socket.emit("join_room", {name: props.name, roomCode});
+	}, [props.name, roomCode]);
 
 	const createRoom = useCallback(() => {
-		socket.emit("create_room", name);
-	}, [name]);
+		socket.emit("create_room", props.name);
+	}, [props.name]);
 
 	useEffect(() => {
 		socket.on("room_updated", (room: Room) => {
@@ -51,18 +52,18 @@ const Home: React.FC<IProps> = (props: IProps) => {
 			<Form>
 				<Form.Group className="mb-3" controlId="formBasicName">
 					<Form.Label>Name</Form.Label>
-					<Form.Control type="text" placeholder="Enter name" value={name} onChange={(event: any) => setName(event.target.value)} />
+					<Form.Control type="text" placeholder="Enter name" value={props.name} onChange={(event: any) => props.setName(event.target.value)} />
 				</Form.Group>
 
 				<Form.Group className="mb-3" controlId="formBasicCode">
 					<Form.Label>Room Code</Form.Label>
 					<Form.Control type="text" placeholder="Enter code" value={roomCode} onChange={(event: any) => setRoomCode((event.target.value as string).toUpperCase())} maxLength={4} />
 				</Form.Group>
-				<Button className="w-100" variant="primary" type="button" onClick={joinRoom} disabled={name === "" || roomCode === ""}>
+				<Button className="w-100" variant="primary" type="button" onClick={joinRoom} disabled={props.name === "" || roomCode === ""}>
 					Join Room
 				</Button>
 				<h5 className="w-100 text-center mt-2 text-muted">- OR -</h5>
-				<Button className="w-100" variant="primary" type="button" onClick={createRoom} disabled={name === "" || roomCode !== ""}>
+				<Button className="w-100" variant="primary" type="button" onClick={createRoom} disabled={props.name === "" || roomCode !== ""}>
 					Create Room
 				</Button>
 			</Form>

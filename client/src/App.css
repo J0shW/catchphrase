@@ -1,3 +1,11 @@
 :focus-visible {
   outline: none;
 }
+
+.bg-catchphrase {
+  background-color: #a9a9a9;
+}
+
+.list-group-item {
+  background-color: #a9a9a9;
+}

@@ -25,6 +25,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
+document.body.classList.add('bg-catchphrase');
+
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
