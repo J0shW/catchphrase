@@ -4,8 +4,8 @@ import { SocketContext } from "../SocketContext";
 import { Form, Button, Container } from 'react-bootstrap';
 
 interface IProps {
-  	room?: string;
-	setRoom: (room: string | undefined) => void;
+  	room?: Room;
+	setRoom: (room: Room | undefined) => void;
 }
 
 const Home: React.FC<IProps> = (props: IProps) => {
@@ -25,12 +25,15 @@ const Home: React.FC<IProps> = (props: IProps) => {
 	}, [name]);
 
 	useEffect(() => {
-		socket.on("room_joined", props.setRoom);
+		socket.on("room_updated", (room: Room) => {
+			console.log('room', room);
+			props.setRoom(room);
+		});
 
 		return () => {
 			// before the component is destroyed
 			// unbind all event handlers used in this component
-			socket.off("room_joined", props.setRoom);
+			socket.off("room_joined");
 		};
 	}, []);
 
@@ -38,13 +41,13 @@ const Home: React.FC<IProps> = (props: IProps) => {
 		if (props.room === undefined) {
 			navigate('/');
 		} else {
-			navigate('/draw');
+			navigate('/game');
 		}
 	}, [navigate, props.room]);
 
 	return (
 		<Container>
-			<h1>Catchphrase</h1>
+			<h1 className="text-center my-4">Catchphrase</h1>
 			<Form>
 				<Form.Group className="mb-3" controlId="formBasicName">
 					<Form.Label>Name</Form.Label>

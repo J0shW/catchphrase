@@ -25,17 +25,58 @@ io.on("connection", (socket) => {
   socket.on("create_room", (name) => {
     const roomCode = makeCode(4);
     console.log(`${name} created room ${roomCode}`);
-    socket.join(roomCode);
-    roomList = [...roomList, roomCode];
-    console.log('updated room list:', roomList)
-    socket.emit('room_joined', roomCode);
+    handleJoinRoom(name, roomCode);
   });
 
   socket.on("join_room", ({name, roomCode}) => {
     console.log(`${name} joined room ${roomCode}`);
-    socket.join(roomCode);
-    socket.emit('room_joined', roomCode);
+    handleJoinRoom(name, roomCode);
   });
+
+  socket.on("leave_room", (roomCode) => {
+    console.log(`left room ${roomCode}`);
+    socket.leave(roomCode);
+    socket.emit('room_left');
+
+    const roomIndex = roomList.find((room) => room.code === roomCode);
+    if (roomIndex >= 0) {
+      const teamOneIndex = roomList[roomIndex].teamOne.find((id === socket.id));
+      if (teamOneIndex >= 0) {
+        roomList[roomIndex].teamOne.splice(teamOneIndex, 1);
+        console.log(roomList);
+        io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
+      }
+      const teamTwoIndex = roomList[roomIndex].teamTwo.find((id === socket.id));
+      if (teamTwoIndex >= 0) {
+        roomList[roomIndex].teamTwo.splice(teamTwoIndex, 1);
+        console.log(roomList);
+        io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
+      }
+    }
+  });
+
+  const handleJoinRoom = (name, roomCode) => {
+    let room = roomList.find((room) => room.code === roomCode);
+    if (!room) {
+      room = {
+        id: socket.id,
+        code: roomCode,
+        teamOne: [],
+        teamTwo: [],
+      }
+    }
+
+    if (room.teamOne.length === room.teamTwo.length) {
+      room.teamOne.push(name);
+    } else {
+      room.teamTwo.push(name);
+    }
+    
+    socket.join(roomCode);
+    roomList = [...roomList, room];
+    console.log('updated room list:', roomList)
+    io.to(roomCode).emit('room_updated', room);
+  }
 });
 
 server.listen(443, () => {
