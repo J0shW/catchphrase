@@ -35,7 +35,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leave_room", (roomCode) => {
-    socket.emit('room_left');
     const roomIndex = roomList.findIndex((room) => room.code === roomCode);
     console.log('roomIndex', roomIndex);
     if (roomIndex >= 0) {
@@ -140,7 +139,9 @@ io.on("connection", (socket) => {
 
   const removeUserFromRoom = (roomIndex) => {
     console.log('socket.id', socket.id);
-    socket.leave(roomList[roomIndex].roomCode);
+    socket.emit('room_left');
+    socket.leave(roomList[roomIndex].code);
+
     const teamOneIndex = roomList[roomIndex].teamOne.findIndex((player) => player.id === socket.id);
     console.log('teamOneIndex', teamOneIndex);
     if (teamOneIndex >= 0) {
