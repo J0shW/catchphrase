@@ -35,32 +35,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leave_room", (roomCode) => {
-    console.log(`left room ${roomCode}`);
-    socket.leave(roomCode);
-    socket.emit('room_left');
-
     const roomIndex = roomList.findIndex((room) => room.code === roomCode);
     console.log('roomIndex', roomIndex);
     if (roomIndex >= 0) {
-      console.log('socket.id', socket.id);
-      const teamOneIndex = roomList[roomIndex].teamOne.findIndex((player) => player.id === socket.id);
-      console.log('teamOneIndex', teamOneIndex);
-      if (teamOneIndex >= 0) {
-        roomList[roomIndex].teamOne.splice(teamOneIndex, 1);
-        console.log(roomList);
-        io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
-      }
-      const teamTwoIndex = roomList[roomIndex].teamTwo.findIndex((player) => player.id === socket.id);
-      if (teamTwoIndex >= 0) {
-        roomList[roomIndex].teamTwo.splice(teamTwoIndex, 1);
-        console.log(roomList);
-        io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
-      }
-      // remove room if its now empty
-      if (roomList[roomIndex].teamOne.length === 0 && roomList[roomIndex].teamTwo.length === 0) {
-        roomList.splice(roomIndex, 1);
-        console.log('roomList', roomList);
-      }
+      removeUserFromRoom(roomIndex);
     }
   });
 
@@ -123,6 +101,13 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("disconnect", (reason) => {
+    console.log('disconnect: ', reason);
+    for (let i=0; i < roomList.length; i++) {
+     removeUserFromRoom(i);
+    }
+  });
+
   const handleJoinRoom = (name, roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     console.log('roomFound', room);
@@ -150,6 +135,29 @@ io.on("connection", (socket) => {
     
     console.log('updated room list:', roomList)
     io.to(roomCode).emit('room_updated', room);
+  }
+
+  const removeUserFromRoom = (roomIndex) => {
+    console.log('socket.id', socket.id);
+    socket.leave(roomList[roomIndex].roomCode);
+    const teamOneIndex = roomList[roomIndex].teamOne.findIndex((player) => player.id === socket.id);
+    console.log('teamOneIndex', teamOneIndex);
+    if (teamOneIndex >= 0) {
+      roomList[roomIndex].teamOne.splice(teamOneIndex, 1);
+      console.log(roomList);
+      io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
+    }
+    const teamTwoIndex = roomList[roomIndex].teamTwo.findIndex((player) => player.id === socket.id);
+    if (teamTwoIndex >= 0) {
+      roomList[roomIndex].teamTwo.splice(teamTwoIndex, 1);
+      console.log(roomList);
+      io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
+    }
+    // remove room if its now empty
+    if (roomList[roomIndex].teamOne.length === 0 && roomList[roomIndex].teamTwo.length === 0) {
+      roomList.splice(roomIndex, 1);
+      console.log('roomList', roomList);
+    }
   }
 });
 
