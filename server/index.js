@@ -35,6 +35,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leave_room", (roomCode) => {
+    socket.emit('room_left');
     const roomIndex = roomList.findIndex((room) => room.code === roomCode);
     console.log('roomIndex', roomIndex);
     if (roomIndex >= 0) {
