@@ -78,23 +78,16 @@ io.on("connection", (socket) => {
   socket.on("next_turn", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room && room.teamOne.length > 0 && room.teamTwo.length > 0) {
-      const teamOneIndex = room.teamOne.findIndex((player) => player.name === room.turn.player);
-      const teamTwoIndex = room.teamTwo.findIndex((player) => player.name === room.turn.player);
-      if (teamOneIndex >=0) {
-        if (teamOneIndex >= room.teamTwo.length) {
-          room.turn.player = room.teamTwo[0].name;
-        } else {
-          room.turn.player = room.teamTwo[teamOneIndex].name;
-        }
-      } else if (teamTwoIndex >=0) {
-        if (teamTwoIndex + 1 >= room.teamOne.length) {
-          room.turn.player = room.teamOne[0].name;
-        } else {
-          room.turn.player = room.teamOne[teamTwoIndex + 1].name;
-        }
+      room.turn.team = room.turn.team === 1 ? 2 : 1;
+
+      if (room.turn.team === 1) {
+        room.teamOnePlayerIndex = findNextPlayerIndex(room.teamOne, room.teamOnePlayerIndex);
+        room.turn.player = room.teamOne[room.teamOnePlayerIndex].name;
+      } else {
+        room.teamTwoPlayerIndex = findNextPlayerIndex(room.teamTwo, room.teamTwoPlayerIndex);
+        room.turn.player = room.teamTwo[room.teamTwoPlayerIndex].name;
       }
 
-      room.turn.team = room.turn.team === 1 ? 2 : 1;
       room.turn.phrase = newWord();
       console.log('turn', room.turn)
       io.to(roomCode).emit('room_updated', room);
@@ -119,6 +112,8 @@ io.on("connection", (socket) => {
         teamTwo: [],
         teamOneScore: 0,
         teamTwoScore: 0,
+        teamOnePlayerIndex: 0,
+        teamTwoPlayerIndex: 0,
         timerDate: undefined,
         turn: {team: 1, player: name, phrase: newWord()}
       }
@@ -166,6 +161,18 @@ io.on("connection", (socket) => {
 server.listen(443, () => {
   console.log("SERVER IS RUNNING");
 });
+
+function findNextPlayerIndex(players, startIndex) {
+  let playerIndex = startIndex + 1;
+  while (!players[playerIndex]) {
+    if (playerIndex >= players.length) {
+      playerIndex = 0;
+    } else {
+      playerIndex++;
+    }
+  }
+  return playerIndex;
+}
 
 function newWord() {
   const wordCount = database.words.length;
