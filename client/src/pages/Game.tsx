@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { SocketContext } from "../SocketContext";
 
 enum BlinkerColor {
-	green = '#00FF00',
-	orange = '#FFAA11',
-	red = '#FF0000',
+	green = 'bg-success',
+	orange = 'bg-warning',
+	red = 'bg-danger',
 }
 
 const DEFAULT_TIMER_LENGTH = 60; // seconds
@@ -124,7 +124,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 			<h1 className="my-4">Catchphrase</h1>
 			<div className="d-flex justify-content-center mb-4">
 				<div id="blinker-wrapper" className="border border-5 rounded-circle">
-					<div id="blinker" className={`rounded-circle ${blinker.show ? 'visible' : 'hidden'}`} style={{backgroundColor: blinker.color}}></div>
+					<div id="blinker" className={`rounded-circle ${blinker.color} ${blinker.show ? 'visible' : 'hidden'}`}></div>
 				</div>
 			</div>
 			<Row>
@@ -201,7 +201,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 				<Button className="" variant="outline-danger" type="button" onClick={leaveRoom} disabled={props.room === undefined}>
 					Leave Room
 				</Button>
-				<h3 className="text-muted mt-2 mt-sm-0">Room code: {props.room?.code}</h3>
+				<h3 className="text-muted mt-2 mt-sm-0 mb-0">Room code: {props.room?.code}</h3>
 			</div>
 			
 		</Container>
