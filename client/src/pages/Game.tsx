@@ -3,8 +3,15 @@ import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { SocketContext } from "../SocketContext";
 
-const DEFAULT_TIMER_LENGTH = 15; // seconds
+enum BlinkerColor {
+	green = '#00FF00',
+	orange = '#FFAA11',
+	red = '#FF0000',
+}
+
+const DEFAULT_TIMER_LENGTH = 60; // seconds
 const DEFAULT_TEMPO = 1000;
+const DEFAULT_BLINKER : Blinker = {show: false, color: BlinkerColor.green };
 interface IProps {
   	room?: Room;
 	setRoom: (room: Room | undefined) => void;
@@ -16,6 +23,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	const navigate = useNavigate();
 
 	const [timerLength, setTimerLength] = useState(DEFAULT_TIMER_LENGTH);
+	const [blinker, setBlinker] = useState<Blinker>(DEFAULT_BLINKER);
 
 	const leaveRoom = useCallback(() => {
 		socket.emit("leave_room", props.room?.code);
@@ -24,6 +32,10 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	const start = useCallback(() => {
 		socket.emit("start_timer", props.room?.code);
 	}, [props.room]);
+
+	const updateTimerLength = useCallback(() => {
+		socket.emit("set_timer_length", { roomCode: props.room?.code, timerLength: timerLength});
+	}, [props.room, timerLength]);
 
 	const end = useCallback(() => {
 		if (props.room?.hostPlayer === props.name) {
@@ -52,7 +64,9 @@ const Game: React.FC<IProps> = (props: IProps) => {
 		return () => {
 			// before the component is destroyed
 			// unbind all event handlers used in this component
-			socket.off("room_left", () => props.setRoom(undefined));
+			console.log('destroy');
+			socket.off("room_updated");
+			socket.off("room_left");
 		};
 	}, []);
 
@@ -60,17 +74,27 @@ const Game: React.FC<IProps> = (props: IProps) => {
 		if (props.room?.timerDate) {
 			const diff = Date.now() - props.room.timerDate;
 			// console.log('diff', diff);
-			if (diff >= (timerLength * 1000)) {
+			if (diff >= (props.room.baffledTimer * 1000)) {
+				setBlinker(DEFAULT_BLINKER);
 				end();
 			} else {
-				const tempo = ((timerLength * 1000) / diff) * 100;
+				let tempo = ((props.room.baffledTimer * 1000) / diff) * 100;
+				tempo = tempo < DEFAULT_TEMPO ? tempo : DEFAULT_TEMPO;
+				// console.log('tempo', tempo);
 
-				const audio = new Audio(require('../beep.mp3'));
-				audio.play();
+				// const audio = new Audio(require('../beep.mp3'));
+				// audio.play();
+				let color: BlinkerColor = BlinkerColor.green;
+				switch (true) {
+					case tempo < 200 : color = BlinkerColor.red; break;
+					case tempo < 400 : color = BlinkerColor.orange; break;
+				}
+
+				setBlinker(current => {return {show: !current.show, color}});
 	
 				setTimeout(() => {
 					beep();
-				}, tempo < DEFAULT_TEMPO ? tempo : DEFAULT_TEMPO);
+				}, tempo);
 			}
 		}
 	}, [props.room?.timerDate]);
@@ -98,6 +122,11 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	return (
 		<Container>
 			<h1 className="my-4">Catchphrase</h1>
+			<div className="d-flex justify-content-center mb-4">
+				<div id="blinker-wrapper" className="border border-5 rounded-circle">
+					<div id="blinker" className={`rounded-circle ${blinker.show ? 'visible' : 'hidden'}`} style={{backgroundColor: blinker.color}}></div>
+				</div>
+			</div>
 			<Row>
 				<Col>
 					<h5>Team One: {props.room?.teamOneScore}</h5>
@@ -157,10 +186,13 @@ const Game: React.FC<IProps> = (props: IProps) => {
 			)}
 
 			{(isHost && !isRoundStarted) && (
-				<div className="d-flex justify-content-center mt-3">
-					<Form.Group controlId="formBasicTimer">
+				<div className="d-flex justify-content-center mt-4">
+					<Form.Group controlId="formBasicTimer" className="d-flex flex-column">
 						<Form.Label>Timer Length (seconds):</Form.Label>
-						<Form.Control  type="number" placeholder="Timer length" value={timerLength} onChange={(event: any) => setTimerLength(event.target.value as number)} />
+						<Form.Control  type="number" placeholder="Timer length" value={timerLength} onChange={(event: any) => setTimerLength(parseInt(event.target.value))} />
+						<Button className="mt-2" variant="outline-primary" type="button" onClick={updateTimerLength} disabled={props.room === undefined}>
+							Set Length
+						</Button>
 					</Form.Group>
 				</div>
 			)}

@@ -42,6 +42,15 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("set_timer_length", ({roomCode, timerLength}) => {
+    let room = roomList.find((room) => room.code === roomCode);
+    if (room) {
+      room.timerLength = timerLength;
+      room.baffledTimer = getBaffledTimer(timerLength)
+      io.to(roomCode).emit('room_updated', room);
+    }
+  });
+
   socket.on("start_timer", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room) {
@@ -114,6 +123,8 @@ io.on("connection", (socket) => {
         teamTwoScore: 0,
         teamOnePlayerIndex: 0,
         teamTwoPlayerIndex: 0,
+        timerLength: 60,
+        baffledTimer: getBaffledTimer(60),
         timerDate: undefined,
         turn: {team: 1, player: name, phrase: newWord()}
       }
@@ -191,4 +202,16 @@ function makeCode(length) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
+}
+
+function getBaffledTimer(length) {
+  const plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+  const fifthOfLength = length / 5;
+
+  // Returns a random integer from 0 to fifthOfLength:
+  const randomInt = Math.floor(Math.random() * fifthOfLength);
+
+  const baffle = (randomInt * plusOrMinus) + length;
+  console.log('baffle', baffle);
+  return baffle;
 }

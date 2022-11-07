@@ -9,3 +9,30 @@
 .list-group-item {
   background-color: #a9a9a9;
 }
+
+#blinker {
+  width: 75px;
+  height: 75px;
+}
+
+.visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms linear;
+}
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 100ms, opacity 100ms linear;
+}
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: .5;
+  }
+  100% {
+    opacity: 1;
+  }
+}

@@ -5,6 +5,10 @@ interface Room {
 	teamTwo: Player[];
 	teamOneScore: number,
     teamTwoScore: number,
+	teamOnePlayerIndex: number,
+    teamTwoPlayerIndex: number,
+    timerLength: number,
+    baffledTimer: number,
 	timerDate: number | undefined;
 	turn: Turn;
 }
@@ -23,4 +27,9 @@ interface Turn {
 interface Phrase {
 	word: string;
 	category: string;
+}
+
+interface Blinker {
+	show: boolean;
+	color: string;
 }
