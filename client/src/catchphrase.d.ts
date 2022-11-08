@@ -10,6 +10,7 @@ interface Room {
     timerLength: number,
     baffledTimer: number,
 	timerDate: number | undefined;
+	filters: Category[];
 	turn: Turn;
 }
 
@@ -32,4 +33,9 @@ interface Phrase {
 interface Blinker {
 	show: boolean;
 	color: string;
+}
+
+interface Category {
+	name: string;
+	active: boolean;
 }

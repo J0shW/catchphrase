@@ -19,6 +19,14 @@ const io = new Server(server, {
 
 let roomList = [];
 const database = require('./database.json');
+let categories = [];
+database.words.forEach((phrase) => {
+  if (!categories.includes(phrase.category)) {
+    categories.push(phrase.category);
+  }
+});
+console.log('categories', categories);
+const default_filters = categories.map((category) => {return {name: category, active: true}});
 
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
@@ -42,6 +50,14 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("set_filters", ({roomCode, filters}) => {
+    let room = roomList.find((room) => room.code === roomCode);
+    if (room) {
+      room.filters = filters;
+      io.to(roomCode).emit('room_updated', room);
+    }
+  });
+
   socket.on("set_timer_length", ({roomCode, timerLength}) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room) {
@@ -55,7 +71,7 @@ io.on("connection", (socket) => {
   socket.on("start_timer", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room) {
-      room.turn.phrase = newWord();
+      room.turn.phrase = newWord(room.filters);
       room.timerDate = Date.now();
       console.log('timer started', room);
       io.to(roomCode).emit('room_updated', room);
@@ -80,7 +96,7 @@ io.on("connection", (socket) => {
   socket.on("skip", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room) {
-      room.turn.phrase = newWord();
+      room.turn.phrase = newWord(room.filters);
       io.to(roomCode).emit('room_updated', room);
     }
   });
@@ -98,7 +114,7 @@ io.on("connection", (socket) => {
         room.turn.player = room.teamTwo[room.teamTwoPlayerIndex].name;
       }
 
-      room.turn.phrase = newWord();
+      room.turn.phrase = newWord(room.filters);
       console.log('turn', room.turn)
       io.to(roomCode).emit('room_updated', room);
     }
@@ -113,7 +129,6 @@ io.on("connection", (socket) => {
 
   const handleJoinRoom = (name, roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
-    console.log('roomFound', room);
     if (!room) {
       room = {
         code: roomCode,
@@ -127,7 +142,8 @@ io.on("connection", (socket) => {
         timerLength: 60,
         baffledTimer: getBaffledTimer(60),
         timerDate: undefined,
-        turn: {team: 1, player: name, phrase: newWord()}
+        filters: default_filters,
+        turn: {team: 1, player: name, phrase: newWord(default_filters)}
       }
       roomList = [...roomList, room];
     }
@@ -186,13 +202,16 @@ function findNextPlayerIndex(players, startIndex) {
   return playerIndex;
 }
 
-function newWord() {
-  const wordCount = database.words.length;
-  console.log('wordCount', wordCount);
+function newWord(filters) {
+  let validCategories = filters.filter((filter) => filter.active);
+  validCategories = validCategories.map((category) => category.name);
 
-  const wordIndex = Math.floor(Math.random() * wordCount);
-  console.log('word', database.words[wordIndex])
-  return database.words[wordIndex];
+  const phrases = database.words.filter((phrase) => validCategories.includes(phrase.category));
+  const count = phrases.length;
+
+  const wordIndex = Math.floor(Math.random() * count);
+  console.log('word', phrases[wordIndex])
+  return phrases[wordIndex];
 }
 
 function makeCode(length) {
@@ -213,6 +232,5 @@ function getBaffledTimer(length) {
   const randomInt = Math.floor(Math.random() * fifthOfLength);
 
   const baffle = (randomInt * plusOrMinus) + length;
-  console.log('baffle', baffle);
   return baffle;
 }

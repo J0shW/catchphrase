@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import Filters from "../components/Filters";
 import { SocketContext } from "../SocketContext";
 
 enum BlinkerColor {
@@ -37,12 +38,16 @@ const Game: React.FC<IProps> = (props: IProps) => {
 		socket.emit("set_timer_length", { roomCode: props.room?.code, timerLength: timerLength});
 	}, [props.room, timerLength]);
 
+	const setFilters = useCallback((filters: Category[]) => {
+		socket.emit("set_filters", { roomCode: props.room?.code, filters});
+	}, [props.room]);
+
 	const end = useCallback(() => {
 		if (props.room?.hostPlayer === props.name) {
 			socket.emit("end_timer", props.room?.code);
 		}
-		const endAudio = new Audio(require('../chime.mp3'));
-		endAudio.play();
+		// const endAudio = new Audio(require('../chime.mp3'));
+		// endAudio.play();
 	}, [props.room]);
 
 	const skip = useCallback(() => {
@@ -122,11 +127,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	return (
 		<Container>
 			<h1 className="my-4">Catchphrase</h1>
-			<div className="d-flex justify-content-center mb-4">
-				<div id="blinker-wrapper" className="border border-5 rounded-circle">
-					<div id="blinker" className={`rounded-circle ${blinker.color} ${blinker.show ? 'visible' : 'hidden'}`}></div>
-				</div>
-			</div>
+
 			<Row>
 				<Col>
 					<h5>Team One: {props.room?.teamOneScore}</h5>
@@ -145,6 +146,12 @@ const Game: React.FC<IProps> = (props: IProps) => {
 					</ListGroup>
 				</Col>
 			</Row>
+
+			<div className="d-flex justify-content-center mt-5">
+				<div id="blinker-wrapper" className="border border-5 rounded-circle">
+					<div id="blinker" className={`rounded-circle ${blinker.color} ${blinker.show ? 'visible' : 'hidden'}`}></div>
+				</div>
+			</div>
 
 			{(isMyTurn && !isRoundStarted) && (
 				<div className="d-flex justify-content-center mt-5">
@@ -186,14 +193,17 @@ const Game: React.FC<IProps> = (props: IProps) => {
 			)}
 
 			{(isHost && !isRoundStarted) && (
-				<div className="d-flex justify-content-center mt-4">
-					<Form.Group controlId="formBasicTimer" className="d-flex flex-column">
-						<Form.Label>Timer Length (seconds):</Form.Label>
-						<Form.Control  type="number" placeholder="Timer length" value={timerLength} onChange={(event: any) => setTimerLength(parseInt(event.target.value))} />
-						<Button className="mt-2" variant="outline-primary" type="button" onClick={updateTimerLength} disabled={props.room === undefined}>
-							Set Length
-						</Button>
-					</Form.Group>
+				<div className="d-flex flex-column align-items-center mt-5">
+					<Filters filters={props.room?.filters ?? []} setFilters={setFilters} />
+					<div className="d-flex justify-content-center mt-4">
+						<Form.Group controlId="formBasicTimer" className="d-flex flex-column">
+							<Form.Label>Timer Length (seconds):</Form.Label>
+							<Form.Control  type="number" placeholder="Timer length" value={timerLength} onChange={(event: any) => setTimerLength(parseInt(event.target.value))} />
+							<Button className="mt-2" variant="outline-primary" type="button" onClick={updateTimerLength} disabled={props.room === undefined}>
+								Set Length
+							</Button>
+						</Form.Group>
+					</div>
 				</div>
 			)}
 			
