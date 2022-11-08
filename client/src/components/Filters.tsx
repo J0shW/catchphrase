@@ -17,12 +17,12 @@ const Filters: React.FC<IProps> = (props: IProps) => {
 	// const [categories, setCategories] = useState(INITIAL_CATEGORIES);
 
 	return (
-		<Dropdown autoClose='outside'>
-			<Dropdown.Toggle variant="success" id="dropdown-basic">
+		<Dropdown autoClose='outside' className="category-dropdown">
+			<Dropdown.Toggle variant="outline-dark" id="dropdown-basic" className="w-100">
 				Categories
 			</Dropdown.Toggle>
 
-			<Dropdown.Menu>
+			<Dropdown.Menu className="w-100">
 				{props.filters.map((category) => 
 					<Dropdown.Item href="#/action-category" key={`check-${category.name}`}>
 						<Form.Check 
@@ -52,7 +52,7 @@ const Filters: React.FC<IProps> = (props: IProps) => {
 					</Dropdown.Item>		
 				)}
 			</Dropdown.Menu>
-			</Dropdown>
+		</Dropdown>
 	);
 }
 

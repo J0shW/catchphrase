@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
       room.timerLength = timerLength;
       room.baffledTimer = getBaffledTimer(timerLength);
       io.to(roomCode).emit('room_updated', room);
-      socket.emit('notification', 'Timer length updated.');
+      // socket.emit('notification', 'Timer length updated.');
     }
   });
 

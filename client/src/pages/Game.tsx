@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
+import { Button, Container, Form, ListGroup, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Filters from "../components/Filters";
 import { SocketContext } from "../SocketContext";
@@ -25,6 +25,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 
 	const [timerLength, setTimerLength] = useState(DEFAULT_TIMER_LENGTH);
 	const [blinker, setBlinker] = useState<Blinker>(DEFAULT_BLINKER);
+	const [showSettingsModal, setShowSettingsModal] = useState(false);
 
 	const leaveRoom = useCallback(() => {
 		socket.emit("leave_room", props.room?.code);
@@ -109,6 +110,10 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	}, [props.room?.timerDate]);
 
 	useEffect(() => {
+		updateTimerLength();
+	}, [timerLength]);
+
+	useEffect(() => {
 		if (props.room === undefined) {
 			navigate('/');
 		} else {
@@ -125,94 +130,120 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	const isMyTeamsTurn = (props.room?.turn.team === 1 && isTeamOne) || (props.room?.turn.team === 2 && isTeamTwo);
 
 	return (
-		<Container>
-			<h1 className="my-4">Catchphrase</h1>
+		<Container className="d-flex flex-column justify-content-between">
+			<div>
+				<div className="d-flex justify-content-between align-items-center mt-4">
+					<h1>Catchphrase</h1>
+					<Button variant="outline-dark" className={`${isHost ? 'd-flex' : 'd-none'}`} onClick={() => setShowSettingsModal(true)} disabled={isRoundStarted}>
+						<span className="material-symbols-outlined">settings</span>
+					</Button>
+				</div>
 
-			<Row>
-				<Col>
-					<h5>Team One: {props.room?.teamOneScore}</h5>
-					<ListGroup>
+				<div className="d-flex my-3">
+					<ListGroup className="flex-grow-1 has-addon-right" style={props.room?.teamOne && props.room?.teamOne.length > 0 ? {} : {borderBottomRightRadius: 0}}>
+						<ListGroup.Item key={'team-one-name'}><b>Team One</b></ListGroup.Item>
 						{props.room?.teamOne.map((player) =>
-							<ListGroup.Item key={player.id} className={currentPlayer === player.name ? "bg-light text-primary" : ""}>{player.name} {player.name === props.name && "- You"}</ListGroup.Item>
+							<ListGroup.Item key={player.id} className={currentPlayer === player.name ? "text-primary" : ""}>{player.name} {player.name === props.name && "- You"}</ListGroup.Item>
 						)}
 					</ListGroup>
-				</Col>
-				<Col>
-					<h5>Team Two: {props.room?.teamTwoScore}</h5>
-					<ListGroup>
-						{props.room?.teamTwo.map((player) =>
-							<ListGroup.Item key={player.id} className={currentPlayer === player.name ? "bg-light text-primary" : ""}>{player.name}  {player.name === props.name && "- You"}</ListGroup.Item>
-						)}
+					<ListGroup className="is-addon-right me-3">
+						<ListGroup.Item key={'team-one-score'}>
+							<b>{props.room?.teamOneScore}</b>
+						</ListGroup.Item>
 					</ListGroup>
-				</Col>
-			</Row>
 
-			<div className="d-flex justify-content-center mt-5">
-				<div id="blinker-wrapper" className="border border-5 rounded-circle">
-					<div id="blinker" className={`rounded-circle ${blinker.color} ${blinker.show ? 'visible' : 'hidden'}`}></div>
+					<ListGroup className="is-addon-left">
+						<ListGroup.Item key={'team-two-score'}>
+							<b>{props.room?.teamTwoScore}</b>
+						</ListGroup.Item>
+					</ListGroup>
+					<ListGroup className="flex-grow-1 has-addon-left" style={props.room?.teamTwo && props.room?.teamTwo.length > 0 ? {} : {borderBottomLeftRadius: 0}}>
+						<ListGroup.Item key={'team-one-name'}><b>Team Two</b></ListGroup.Item>
+						{props.room?.teamTwo.map((player) =>
+							<ListGroup.Item key={player.id} className={currentPlayer === player.name ? "text-primary" : ""}>{player.name} {player.name === props.name && "- You"}</ListGroup.Item>
+						)}
+					</ListGroup>
 				</div>
 			</div>
 
-			{(isMyTurn && !isRoundStarted) && (
-				<div className="d-flex justify-content-center mt-5">
-					<Button className="me-2" variant="primary" type="button" onClick={start} disabled={props.room === undefined}>
-						Start Round
-					</Button>
-					<Button className="me-2" variant="outline-primary" type="button" onClick={nextTurn} disabled={props.room === undefined}>
-						Next Player
-					</Button>
+			<div>
+				<div className="d-flex justify-content-center">
+					<div id="blinker-wrapper" className="border border-5 rounded-circle">
+						<div id="blinker" className={`rounded-circle ${blinker.color} ${blinker.show ? 'visible' : 'hidden'}`}></div>
+					</div>
 				</div>
-			)}
 
-			{(isMyTurn && isRoundStarted) && (
-				<>
-					<h2 className="text-center text-primary text-capitalize h1 mt-5">{props.room?.turn.phrase.word}</h2>
-					<p className="text-center text-muted">Category: {props.room?.turn.phrase.category}</p>
-
-					<div className="d-flex justify-content-center mt-2">
-						<Button className="me-2" variant="success" type="button" onClick={nextTurn} disabled={props.room === undefined}>
-							Got it!
+				{(isMyTurn && !isRoundStarted) && (
+					<div className="d-flex justify-content-center mt-5">
+						<Button className="me-2" variant="primary" type="button" onClick={start} disabled={props.room === undefined}>
+							Start Round
 						</Button>
-						<Button className="" variant="secondary" type="button" onClick={skip} disabled={props.room === undefined}>
-							Skip
+						<Button className="me-2" variant="outline-primary" type="button" onClick={nextTurn} disabled={props.room === undefined}>
+							Next Player
 						</Button>
 					</div>
-				</>
-			)}
+				)}
 
-			{(!isMyTurn && !isRoundStarted) && (
-				<h2 className="text-center text-secondary text-capitalize h1 mt-5">Waiting for round to start . . .</h2>
-			)}
+				{(isMyTurn && isRoundStarted) && (
+					<>
+						<h2 className="text-center text-primary text-capitalize h1 mt-5">{props.room?.turn.phrase.word}</h2>
+						<p className="text-center text-muted">Category: {props.room?.turn.phrase.category}</p>
 
-			{(!isMyTurn && isMyTeamsTurn && isRoundStarted) && (
-				<h2 className="text-center text-primary text-capitalize h1 mt-5">Time to Guess!</h2>
-			)}
-
-			{(!isMyTurn && !isMyTeamsTurn && isRoundStarted) && (
-				<h2 className="text-center text-secondary text-capitalize h1 mt-5">Other Team's Turn . . .</h2>
-			)}
-
-			{(isHost && !isRoundStarted) && (
-				<div className="d-flex flex-column align-items-center mt-5">
-					<Filters filters={props.room?.filters ?? []} setFilters={setFilters} />
-					<div className="d-flex justify-content-center mt-4">
-						<Form.Group controlId="formBasicTimer" className="d-flex flex-column">
-							<Form.Label>Timer Length (seconds):</Form.Label>
-							<Form.Control  type="number" placeholder="Timer length" value={timerLength} onChange={(event: any) => setTimerLength(parseInt(event.target.value))} />
-							<Button className="mt-2" variant="outline-primary" type="button" onClick={updateTimerLength} disabled={props.room === undefined}>
-								Set Length
+						<div className="d-flex justify-content-center mt-2">
+							<Button className="me-2" variant="success" type="button" onClick={nextTurn} disabled={props.room === undefined}>
+								Got it!
 							</Button>
-						</Form.Group>
-					</div>
-				</div>
-			)}
-			
-			<div className="d-sm-flex flex-row mt-5 justify-content-between align-items-center">
-				<Button className="" variant="outline-danger" type="button" onClick={leaveRoom} disabled={props.room === undefined}>
+							<Button className="" variant="secondary" type="button" onClick={skip} disabled={props.room === undefined}>
+								Skip
+							</Button>
+						</div>
+					</>
+				)}
+
+				{(!isMyTurn && !isRoundStarted) && (
+					<h2 className="text-center text-secondary text-capitalize h1 mt-5">Waiting for round to start . . .</h2>
+				)}
+
+				{(!isMyTurn && isMyTeamsTurn && isRoundStarted) && (
+					<h2 className="text-center text-primary text-capitalize h1 mt-5">Time to Guess!</h2>
+				)}
+
+				{(!isMyTurn && !isMyTeamsTurn && isRoundStarted) && (
+					<h2 className="text-center text-secondary text-capitalize h1 mt-5">Other Team's Turn . . .</h2>
+				)}
+			</div>
+
+			<div className="d-flex flex-row mb-3 justify-content-between align-items-center">
+				<Button variant="outline-danger" type="button" onClick={leaveRoom} disabled={props.room === undefined}>
 					Leave Room
 				</Button>
-				<h3 className="text-muted mt-2 mt-sm-0 mb-0">Room code: {props.room?.code}</h3>
+				<h3 className="text-muted mb-0">Room code: {props.room?.code}</h3>
 			</div>
+
+			<Modal show={showSettingsModal} onHide={() => setShowSettingsModal(false)}>
+				<Modal.Header closeButton>
+					<Modal.Title>Game Settings</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<div className="d-flex flex-column align-items-center my-3">
+						<Filters filters={props.room?.filters ?? []} setFilters={setFilters} />
+						<div className="d-flex justify-content-center mt-4">
+							<Form.Group controlId="formBasicTimer" className="d-flex flex-column">
+								<Form.Label>Timer Length (seconds):</Form.Label>
+								<Form.Control  type="number" placeholder="Timer length" value={timerLength} onChange={(event: any) => setTimerLength(parseInt(event.target.value))} />
+							</Form.Group>
+						</div>
+					</div>
+				</Modal.Body>
+				{/* <Modal.Footer>
+					<Button variant="secondary" onClick={() => setShowSettingsModal(false)}>
+						Close
+					</Button>
+					<Button variant="primary" onClick={() => setShowSettingsModal(false)}>
+						Save Changes
+					</Button>
+				</Modal.Footer> */}
+			</Modal>
 			
 		</Container>
 	)

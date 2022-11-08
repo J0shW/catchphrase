@@ -2,6 +2,11 @@
   outline: none;
 }
 
+html, body, #root, .container {
+  height: 100%;
+  min-height: 100%;
+}
+
 .bg-catchphrase {
   background-color: #a9a9a9;
 }
@@ -35,4 +40,35 @@
   100% {
     opacity: 1;
   }
+}
+
+.has-addon-right {
+  border-top-right-radius: 0;
+  border-right: none;
+  margin-right: -1px;
+}
+
+.is-addon-right {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.has-addon-left {
+  border-top-left-radius: 0;
+  border-right: none;
+  margin-left: -1px;
+}
+
+.is-addon-left {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.category-dropdown {
+  width: 207px;
+}
+
+.form-check-label {
+  width: 100%;
+  cursor: pointer;
 }
