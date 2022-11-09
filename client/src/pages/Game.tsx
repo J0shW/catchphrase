@@ -133,7 +133,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 		<Container className="d-flex flex-column justify-content-between">
 			<div>
 				<div className="d-flex justify-content-between align-items-center mt-4">
-					<h1>Catchphrase</h1>
+					<h1>Phrase Frenzy</h1>
 					<Button variant="outline-light" className={`${isHost ? 'd-flex' : 'd-none'}`} onClick={() => setShowSettingsModal(true)} disabled={isRoundStarted}>
 						<span className="material-symbols-outlined">settings</span>
 					</Button>

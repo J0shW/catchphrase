@@ -48,7 +48,7 @@ const Home: React.FC<IProps> = (props: IProps) => {
 
 	return (
 		<Container className="align-items-center d-flex flex-column">
-			<h1 className="text-center my-4">Catchphrase</h1>
+			<h1 className="text-center my-4">Phrase Frenzy</h1>
 			<Form className="col-12 col-sm-7 col-md-5 col-lg-4">
 				<Form.Group className="mb-3" controlId="formBasicName">
 					<Form.Label>Name</Form.Label>
