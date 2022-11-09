@@ -8,11 +8,11 @@ html, body, #root, .container {
 }
 
 .bg-catchphrase {
-  background-color: #a9a9a9;
+  /* background-color: #a9a9a9; */
 }
 
 .list-group-item {
-  background-color: #a9a9a9;
+  /* background-color: #a9a9a9; */
 }
 
 #blinker {

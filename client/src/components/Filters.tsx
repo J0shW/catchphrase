@@ -18,7 +18,7 @@ const Filters: React.FC<IProps> = (props: IProps) => {
 
 	return (
 		<Dropdown autoClose='outside' className="category-dropdown">
-			<Dropdown.Toggle variant="outline-dark" id="dropdown-basic" className="w-100">
+			<Dropdown.Toggle variant="outline-light" id="dropdown-basic" className="w-100">
 				Categories
 			</Dropdown.Toggle>
 

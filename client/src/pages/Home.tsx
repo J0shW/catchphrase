@@ -47,9 +47,9 @@ const Home: React.FC<IProps> = (props: IProps) => {
 	}, [navigate, props.room]);
 
 	return (
-		<Container>
+		<Container className="align-items-center d-flex flex-column">
 			<h1 className="text-center my-4">Catchphrase</h1>
-			<Form>
+			<Form className="col-12 col-sm-7 col-md-5 col-lg-4">
 				<Form.Group className="mb-3" controlId="formBasicName">
 					<Form.Label>Name</Form.Label>
 					<Form.Control type="text" placeholder="Enter name" value={props.name} onChange={(event: any) => props.setName(event.target.value)} />
