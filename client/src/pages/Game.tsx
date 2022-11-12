@@ -1,5 +1,5 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import { Button, Container, Form, ListGroup, Modal } from "react-bootstrap";
+import { forwardRef, useCallback, useContext, useEffect, useState } from "react";
+import { Button, Container, Form, ListGroup, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Filters from "../components/Filters";
 import { SocketContext } from "../SocketContext";
@@ -26,6 +26,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	const [timerLength, setTimerLength] = useState(DEFAULT_TIMER_LENGTH);
 	const [blinker, setBlinker] = useState<Blinker>(DEFAULT_BLINKER);
 	const [showSettingsModal, setShowSettingsModal] = useState(false);
+	const [codeCopied, setCodeCopied] = useState(false);
 
 	const leaveRoom = useCallback(() => {
 		socket.emit("leave_room", props.room?.code);
@@ -112,6 +113,12 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	useEffect(() => {
 		updateTimerLength();
 	}, [timerLength]);
+
+	useEffect(() => {
+		setTimeout(() => {
+			setCodeCopied(false);
+		}, 2000);
+	}, [codeCopied]);
 
 	useEffect(() => {
 		if (props.room === undefined) {
@@ -217,7 +224,21 @@ const Game: React.FC<IProps> = (props: IProps) => {
 				<Button variant="outline-danger" type="button" onClick={leaveRoom} disabled={props.room === undefined}>
 					Leave Room
 				</Button>
-				<h3 className="text-muted mb-0">Room code: {props.room?.code}</h3>
+				<OverlayTrigger
+					placement="top"
+					delay={{ show: 250, hide: 400 }}
+					overlay={
+						// @ts-ignore
+						<DynamicTooltip id="copycode-tooltip">{codeCopied ? 'Copied!' : 'Click to copy'}</DynamicTooltip>
+					}
+				>
+					<Button variant="dark" onClick={() => {
+						navigator.clipboard.writeText(props.room?.code!);
+						setCodeCopied(true);
+					}}>
+						Room code: {props.room?.code}
+					</Button>
+				</OverlayTrigger>
 			</div>
 
 			<Modal show={showSettingsModal} onHide={() => setShowSettingsModal(false)}>
@@ -250,3 +271,16 @@ const Game: React.FC<IProps> = (props: IProps) => {
 };
 
 export default Game;
+
+const DynamicTooltip = forwardRef<HTMLDivElement>((props: any, ref) => {
+	useEffect(() => {
+		console.log('updating!');
+		props.popper.scheduleUpdate();
+	}, [props.children, props.popper]);
+
+	return (
+		<Tooltip ref={ref} {...props}>
+			{props.children}
+		</Tooltip>
+	);
+});
