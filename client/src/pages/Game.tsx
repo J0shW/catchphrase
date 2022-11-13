@@ -1,8 +1,10 @@
-import { forwardRef, useCallback, useContext, useEffect, useState } from "react";
-import { Button, Container, Form, ListGroup, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { Button, Container, OverlayTrigger } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import Filters from "../components/Filters";
+import Teams from "../components/Teams";
+import DynamicTooltip from "../components/DynamicTooltip";
 import { SocketContext } from "../SocketContext";
+import SettingsModal from "../components/SettingsModal";
 
 enum BlinkerColor {
 	green = 'bg-success',
@@ -10,7 +12,6 @@ enum BlinkerColor {
 	red = 'bg-danger',
 }
 
-const DEFAULT_TIMER_LENGTH = 60; // seconds
 const DEFAULT_TEMPO = 1000;
 const DEFAULT_BLINKER : Blinker = {show: false, color: BlinkerColor.green };
 interface IProps {
@@ -23,7 +24,6 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	const socket = useContext(SocketContext);
 	const navigate = useNavigate();
 
-	const [timerLength, setTimerLength] = useState(DEFAULT_TIMER_LENGTH);
 	const [blinker, setBlinker] = useState<Blinker>(DEFAULT_BLINKER);
 	const [showSettingsModal, setShowSettingsModal] = useState(false);
 	const [codeCopied, setCodeCopied] = useState(false);
@@ -34,14 +34,6 @@ const Game: React.FC<IProps> = (props: IProps) => {
 
 	const start = useCallback(() => {
 		socket.emit("start_timer", props.room?.code);
-	}, [props.room]);
-
-	const updateTimerLength = useCallback(() => {
-		socket.emit("set_timer_length", { roomCode: props.room?.code, timerLength: timerLength});
-	}, [props.room, timerLength]);
-
-	const setFilters = useCallback((filters: Category[]) => {
-		socket.emit("set_filters", { roomCode: props.room?.code, filters});
 	}, [props.room]);
 
 	const end = useCallback(() => {
@@ -111,13 +103,9 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	}, [props.room?.timerDate]);
 
 	useEffect(() => {
-		updateTimerLength();
-	}, [timerLength]);
-
-	useEffect(() => {
 		setTimeout(() => {
 			setCodeCopied(false);
-		}, 2000);
+		}, 4000);
 	}, [codeCopied]);
 
 	useEffect(() => {
@@ -146,31 +134,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 					</Button>
 				</div>
 
-				<div className="d-flex my-3">
-					<ListGroup className="flex-grow-1 has-addon-right" style={props.room?.teamOne && props.room?.teamOne.length > 0 ? {} : {borderBottomRightRadius: 0}}>
-						<ListGroup.Item key={'team-one-name'}><b>Team One</b></ListGroup.Item>
-						{props.room?.teamOne.map((player) =>
-							<ListGroup.Item key={player.id} className={currentPlayer === player.name ? "text-primary" : ""}>{player.name} {player.name === props.name && "- You"}</ListGroup.Item>
-						)}
-					</ListGroup>
-					<ListGroup className="is-addon-right me-3">
-						<ListGroup.Item key={'team-one-score'}>
-							<b>{props.room?.teamOneScore}</b>
-						</ListGroup.Item>
-					</ListGroup>
-
-					<ListGroup className="is-addon-left">
-						<ListGroup.Item key={'team-two-score'}>
-							<b>{props.room?.teamTwoScore}</b>
-						</ListGroup.Item>
-					</ListGroup>
-					<ListGroup className="flex-grow-1 has-addon-left" style={props.room?.teamTwo && props.room?.teamTwo.length > 0 ? {} : {borderBottomLeftRadius: 0}}>
-						<ListGroup.Item key={'team-one-name'}><b>Team Two</b></ListGroup.Item>
-						{props.room?.teamTwo.map((player) =>
-							<ListGroup.Item key={player.id} className={currentPlayer === player.name ? "text-primary" : ""}>{player.name} {player.name === props.name && "- You"}</ListGroup.Item>
-						)}
-					</ListGroup>
-				</div>
+				<Teams name={props.name} room={props.room} currentPlayer={currentPlayer} />
 			</div>
 
 			<div>
@@ -241,46 +205,9 @@ const Game: React.FC<IProps> = (props: IProps) => {
 				</OverlayTrigger>
 			</div>
 
-			<Modal show={showSettingsModal} onHide={() => setShowSettingsModal(false)}>
-				<Modal.Header closeButton>
-					<Modal.Title>Game Settings</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<div className="d-flex flex-column align-items-center my-3">
-						<Filters filters={props.room?.filters ?? []} setFilters={setFilters} />
-						<div className="d-flex justify-content-center mt-4">
-							<Form.Group controlId="formBasicTimer" className="d-flex flex-column">
-								<Form.Label>Timer Length (seconds):</Form.Label>
-								<Form.Control  type="number" placeholder="Timer length" value={timerLength} onChange={(event: any) => setTimerLength(parseInt(event.target.value))} />
-							</Form.Group>
-						</div>
-					</div>
-				</Modal.Body>
-				{/* <Modal.Footer>
-					<Button variant="secondary" onClick={() => setShowSettingsModal(false)}>
-						Close
-					</Button>
-					<Button variant="primary" onClick={() => setShowSettingsModal(false)}>
-						Save Changes
-					</Button>
-				</Modal.Footer> */}
-			</Modal>
-			
+			<SettingsModal isVisible={showSettingsModal} onClose={() => setShowSettingsModal(false)} room={props.room} />
 		</Container>
 	)
 };
 
 export default Game;
-
-const DynamicTooltip = forwardRef<HTMLDivElement>((props: any, ref) => {
-	useEffect(() => {
-		console.log('updating!');
-		props.popper.scheduleUpdate();
-	}, [props.children, props.popper]);
-
-	return (
-		<Tooltip ref={ref} {...props}>
-			{props.children}
-		</Tooltip>
-	);
-});

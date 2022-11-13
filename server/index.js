@@ -143,7 +143,8 @@ io.on("connection", (socket) => {
         baffledTimer: getBaffledTimer(60),
         timerDate: undefined,
         filters: default_filters,
-        turn: {team: 1, player: name, phrase: newWord(default_filters)}
+        turn: {team: 1, player: name, phrase: newWord(default_filters)},
+        previousTurn: {winningTeam: undefined, wordList: []}
       }
       roomList = [...roomList, room];
     }

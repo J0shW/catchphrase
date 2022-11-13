@@ -12,6 +12,7 @@ interface Room {
 	timerDate: number | undefined;
 	filters: Category[];
 	turn: Turn;
+	previousTurn: {winningTeam?: number, wordList: string[]}
 }
 
 interface Player {
