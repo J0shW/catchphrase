@@ -29,17 +29,30 @@ const PlayArea: React.FC<IProps> = (props: IProps) => {
 	const isTeamOne = props.room?.teamOne && props.room.teamOne.findIndex((player) => player.name === props.name) >= 0;
 	const isTeamTwo = props.room?.teamTwo && props.room.teamTwo.findIndex((player) => player.name === props.name) >= 0;
 	const isMyTeamsTurn = (props.room?.turn.team === 1 && isTeamOne) || (props.room?.turn.team === 2 && isTeamTwo);
+	const winningTeam = props.room?.previousTurn.winningTeam;
+	const myTeamWonRound = (winningTeam === 1 && isTeamOne) || (winningTeam === 2 && isTeamTwo);
 
 	return (
 		<div>
-			<Timer name={props.name} room={props.room} />
+			{props.isRoundStarted && (
+				<Timer name={props.name} room={props.room} />
+			)}
+
+			{(!props.isRoundStarted && winningTeam) && (
+				<>
+					<h2 className="text-center">{'Times Up!'}</h2>
+					<h2 className={`text-center ${myTeamWonRound ? 'text-success' : 'text-danger'}`}>
+						{`${myTeamWonRound ? 'Your' : 'The other'} team got the point ${myTeamWonRound ? '😀' : '🙈'}`}
+					</h2>
+				</>
+			)}
 
 			{(isMyTurn && !props.isRoundStarted) && (
 				<div className="d-flex justify-content-center mt-5">
 					<Button className="me-2" variant="primary" type="button" onClick={start} disabled={props.room === undefined}>
 						Start Round
 					</Button>
-					<Button className="me-2" variant="outline-primary" type="button" onClick={nextTurn} disabled={props.room === undefined}>
+					<Button className="me-2" variant="outline-light" type="button" onClick={nextTurn} disabled={props.room === undefined}>
 						Next Player
 					</Button>
 				</div>
@@ -62,15 +75,15 @@ const PlayArea: React.FC<IProps> = (props: IProps) => {
 			)}
 
 			{(!isMyTurn && !props.isRoundStarted) && (
-				<h2 className="text-center text-secondary text-capitalize h1 mt-5">Waiting for round to start . . .</h2>
+				<h3 className="text-center text-secondary mt-4">Waiting for round to start . . .</h3>
 			)}
 
 			{(!isMyTurn && isMyTeamsTurn && props.isRoundStarted) && (
-				<h2 className="text-center text-primary text-capitalize h1 mt-5">Time to Guess!</h2>
+				<h3 className="text-center text-primary mt-4">Time to Guess!</h3>
 			)}
 
 			{(!isMyTurn && !isMyTeamsTurn && props.isRoundStarted) && (
-				<h2 className="text-center text-secondary text-capitalize h1 mt-5">Other Team's Turn . . .</h2>
+				<h3 className="text-center text-secondary mt-4">Other Team's Turn . . .</h3>
 			)}
 		</div>
 	);

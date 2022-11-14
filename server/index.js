@@ -83,8 +83,10 @@ io.on("connection", (socket) => {
     if (room) {
       if (room.turn.team === 1) {
         room.teamTwoScore = room.teamTwoScore + 1;
+        room.previousTurn.winningTeam = 2;
       } else {
         room.teamOneScore = room.teamOneScore + 1;
+        room.previousTurn.winningTeam = 1;
       }
 
       room.timerDate = undefined;
