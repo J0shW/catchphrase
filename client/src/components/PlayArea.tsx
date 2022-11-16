@@ -48,11 +48,11 @@ const PlayArea: React.FC<IProps> = (props: IProps) => {
 			)}
 
 			{(isMyTurn && !props.isRoundStarted) && (
-				<div className="d-flex justify-content-center mt-5">
+				<div className="d-flex justify-content-center mt-4">
 					<Button className="me-2" variant="primary" type="button" onClick={start} disabled={props.room === undefined}>
 						Start Round
 					</Button>
-					<Button className="me-2" variant="outline-light" type="button" onClick={nextTurn} disabled={props.room === undefined}>
+					<Button className="ms-2" variant="outline-light" type="button" onClick={nextTurn} disabled={props.room === undefined}>
 						Next Player
 					</Button>
 				</div>
@@ -60,14 +60,14 @@ const PlayArea: React.FC<IProps> = (props: IProps) => {
 
 			{(isMyTurn && props.isRoundStarted) && (
 				<>
-					<h2 className="text-center text-primary text-capitalize h1 mt-5">{props.room?.turn.phrase.word}</h2>
+					<h2 className="text-center text-primary text-capitalize h1 mt-4">{props.room?.turn.phrase.word}</h2>
 					<p className="text-center text-muted">Category: {props.room?.turn.phrase.category}</p>
 
 					<div className="d-flex justify-content-center mt-2">
 						<Button className="me-2" variant="success" type="button" onClick={nextTurn} disabled={props.room === undefined}>
 							Got it!
 						</Button>
-						<Button className="" variant="secondary" type="button" onClick={skip} disabled={props.room === undefined}>
+						<Button className="ms-2" variant="secondary" type="button" onClick={skip} disabled={props.room === undefined}>
 							Skip
 						</Button>
 					</div>

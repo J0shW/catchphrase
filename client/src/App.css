@@ -72,3 +72,9 @@ html, body, #root, .container {
   width: 100%;
   cursor: pointer;
 }
+
+.currentPlayer {
+  width: 12px;
+  height: 12px;
+  margin-left: -12px;
+}
