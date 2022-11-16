@@ -6,6 +6,8 @@ import DynamicTooltip from "../components/DynamicTooltip";
 import { SocketContext } from "../SocketContext";
 import SettingsModal from "../components/SettingsModal";
 import PlayArea from "../components/PlayArea";
+import HowToPlayModal from "../components/HowToPlayModal";
+import LeaveRoomModal from "../components/LeaveRoomModal";
 
 interface IProps {
   	room?: Room;
@@ -17,12 +19,10 @@ const Game: React.FC<IProps> = (props: IProps) => {
 	const socket = useContext(SocketContext);
 	const navigate = useNavigate();
 
+	const [showLeaveRoomModal, setShowLeaveRoomModal] = useState(false);
+	const [showHowToPlayModal, setShowHowToPlayModal] = useState(false);
 	const [showSettingsModal, setShowSettingsModal] = useState(false);
 	const [codeCopied, setCodeCopied] = useState(false);
-
-	const leaveRoom = useCallback(() => {
-		socket.emit("leave_room", props.room?.code);
-	}, [props.room]);
 
 	useEffect(() => {
 		socket.on("room_left", () => props.setRoom(undefined));
@@ -64,9 +64,15 @@ const Game: React.FC<IProps> = (props: IProps) => {
 			<div>
 				<div className="d-flex justify-content-between align-items-center">
 					<h1>Phrase Frenzy</h1>
-					<Button variant="outline-light" className={`${isHost ? 'd-flex' : 'd-none'}`} onClick={() => setShowSettingsModal(true)} disabled={isRoundStarted}>
-						<span className="material-symbols-outlined">settings</span>
-					</Button>
+					<div className="d-flex">
+						<Button variant="outline-light" className="me-3" onClick={() => setShowHowToPlayModal(true)} disabled={isRoundStarted}>
+							How To Play
+							{/* <span className="material-symbols-outlined">settings</span> */}
+						</Button>
+						<Button variant="outline-light" className={`${isHost ? 'd-flex' : 'd-none'}`} onClick={() => setShowSettingsModal(true)} disabled={isRoundStarted}>
+							<span className="material-symbols-outlined">settings</span>
+						</Button>
+					</div>
 				</div>
 
 				<Teams name={props.name} room={props.room} currentPlayer={currentPlayer} />
@@ -75,7 +81,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 			<PlayArea name={props.name} room={props.room} isRoundStarted={isRoundStarted} currentPlayer={currentPlayer} />
 
 			<div className="d-flex flex-row justify-content-between align-items-center">
-				<Button variant="outline-secondary" type="button" onClick={leaveRoom} disabled={props.room === undefined}>
+				<Button variant="outline-secondary" type="button" onClick={() => setShowLeaveRoomModal(true)} disabled={props.room === undefined}>
 					Leave Room
 				</Button>
 				<OverlayTrigger
@@ -95,6 +101,8 @@ const Game: React.FC<IProps> = (props: IProps) => {
 				</OverlayTrigger>
 			</div>
 
+			<LeaveRoomModal isVisible={showLeaveRoomModal} onClose={() => setShowLeaveRoomModal(false)} room={props.room} />
+			<HowToPlayModal isVisible={showHowToPlayModal} onClose={() => setShowHowToPlayModal(false)} />
 			<SettingsModal isVisible={showSettingsModal} onClose={() => setShowSettingsModal(false)} room={props.room} />
 		</Container>
 	)

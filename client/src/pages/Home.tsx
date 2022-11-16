@@ -59,11 +59,11 @@ const Home: React.FC<IProps> = (props: IProps) => {
 					<Form.Label>Room Code</Form.Label>
 					<Form.Control type="text" placeholder="Enter code" value={roomCode} onChange={(event: any) => setRoomCode((event.target.value as string).toUpperCase())} maxLength={4} />
 				</Form.Group>
-				<Button className="w-100" variant="primary" type="button" onClick={joinRoom} disabled={props.name === "" || roomCode === ""}>
+				<Button className="w-100" variant="info" type="button" onClick={joinRoom} disabled={props.name === "" || roomCode === ""}>
 					Join Room
 				</Button>
 				<h5 className="w-100 text-center mt-2 text-muted">- OR -</h5>
-				<Button className="w-100" variant="primary" type="button" onClick={createRoom} disabled={props.name === "" || roomCode !== ""}>
+				<Button className="w-100" variant="info" type="button" onClick={createRoom} disabled={props.name === "" || roomCode !== ""}>
 					Create Room
 				</Button>
 			</Form>
