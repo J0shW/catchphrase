@@ -63,7 +63,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 		<Container className="d-flex flex-column justify-content-between pt-4 pb-3">
 			<div>
 				<div className="d-flex justify-content-between align-items-center">
-					<h1>Phrase Frenzy</h1>
+					<h1 className="responsive-heading mb-0">Phrase Frenzy</h1>
 					<div className="d-flex">
 						<Button variant="outline-light" className="me-3" onClick={() => setShowHowToPlayModal(true)} disabled={isRoundStarted}>
 							How To Play

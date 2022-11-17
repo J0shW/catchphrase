@@ -15,10 +15,16 @@ const Home: React.FC<IProps> = (props: IProps) => {
 	const navigate = useNavigate();
 
 	const [roomCode, setRoomCode] = useState("");
+	const [error, setError] = useState();
 
 	const joinRoom = useCallback(() => {
 		console.log('roomCode', {name: props.name, roomCode})
-		socket.emit("join_room", {name: props.name, roomCode});
+		socket.emit("join_room", {name: props.name, roomCode}, (response: any) => {
+			console.log('joinResult', response);
+			if (response === 'duplicate') {
+				setError(response);
+			}
+		});
 	}, [props.name, roomCode]);
 
 	const createRoom = useCallback(() => {
@@ -53,6 +59,7 @@ const Home: React.FC<IProps> = (props: IProps) => {
 				<Form.Group className="mb-3" controlId="formBasicName">
 					<Form.Label>Name</Form.Label>
 					<Form.Control type="text" placeholder="Enter name" value={props.name} onChange={(event: any) => props.setName(event.target.value)} />
+					<Form.Control.Feedback type="invalid" className={error ? 'd-block' : 'd-none'}>Name already taken.</Form.Control.Feedback>
 				</Form.Group>
 
 				<Form.Group className="mb-3" controlId="formBasicCode">

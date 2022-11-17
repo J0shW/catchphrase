@@ -37,8 +37,18 @@ io.on("connection", (socket) => {
     handleJoinRoom(name, roomCode);
   });
 
-  socket.on("join_room", ({name, roomCode}) => {
+  socket.on("join_room", ({name, roomCode}, callbackFn) => {
     console.log(`${name} joined room ${roomCode}`);
+    const room = roomList.find((room) => room.code === roomCode);
+    if (room) {
+      const players = [...room.teamOne, ...room.teamTwo];
+      const names = players.map((player) => player.name);
+      console.log('roomNames', names);
+      if (names.includes(name)) {
+        return callbackFn("duplicate");
+      }
+    }
+
     handleJoinRoom(name, roomCode);
   });
 
