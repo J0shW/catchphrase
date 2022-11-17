@@ -58,7 +58,10 @@ const Home: React.FC<IProps> = (props: IProps) => {
 			<Form className="col-12 col-sm-7 col-md-5 col-lg-4">
 				<Form.Group className="mb-3" controlId="formBasicName">
 					<Form.Label>Name</Form.Label>
-					<Form.Control type="text" placeholder="Enter name" value={props.name} onChange={(event: any) => props.setName(event.target.value)} />
+					<Form.Control type="text" placeholder="Enter name" value={props.name} onChange={(event: any) => {
+							setError(undefined);
+							props.setName(event.target.value);
+					}} />
 					<Form.Control.Feedback type="invalid" className={error ? 'd-block' : 'd-none'}>Name already taken.</Form.Control.Feedback>
 				</Form.Group>
 

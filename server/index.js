@@ -38,13 +38,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join_room", ({name, roomCode}, callbackFn) => {
+    name = name.trim();
     console.log(`${name} joined room ${roomCode}`);
     const room = roomList.find((room) => room.code === roomCode);
     if (room) {
       const players = [...room.teamOne, ...room.teamTwo];
-      const names = players.map((player) => player.name);
+      const names = players.map((player) => player.name.toLowerCase());
       console.log('roomNames', names);
-      if (names.includes(name)) {
+      if (names.includes(name.toLowerCase())) {
         return callbackFn("duplicate");
       }
     }
