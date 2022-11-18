@@ -65,11 +65,10 @@ const Game: React.FC<IProps> = (props: IProps) => {
 				<div className="d-flex justify-content-between align-items-center">
 					<h1 className="responsive-heading mb-0">Phrase Frenzy</h1>
 					<div className="d-flex">
-						<Button variant="outline-light" className="me-3" onClick={() => setShowHowToPlayModal(true)} disabled={isRoundStarted}>
+						<Button variant="outline-light" onClick={() => setShowHowToPlayModal(true)} disabled={isRoundStarted}>
 							How To Play
-							{/* <span className="material-symbols-outlined">settings</span> */}
 						</Button>
-						<Button variant="outline-light" className={`${isHost ? 'd-flex' : 'd-none'}`} onClick={() => setShowSettingsModal(true)} disabled={isRoundStarted}>
+						<Button variant="outline-light" className={`${isHost ? 'd-flex ms-3' : 'd-none'}`} onClick={() => setShowSettingsModal(true)} disabled={isRoundStarted}>
 							<span className="material-symbols-outlined">settings</span>
 						</Button>
 					</div>
