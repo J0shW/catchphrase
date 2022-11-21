@@ -1,8 +1,10 @@
-const express = require("express");
-const path = require('path');
-const http = require("http");
-const { Server } = require("socket.io");
-const cors = require("cors");
+import express from "express";
+import path from 'path';
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
+import { Category, Player, Room } from "./myTypes";
+import database from './database.json';
 
 const app = express();
 app.use(cors());
@@ -11,19 +13,18 @@ app.use(express.static(path.join(__dirname, '/public')));
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:3000", "https://catchphrase-649dd.web.app"],
-    methods: ["GET", "POST"],
-  },
+	cors: {
+		origin: ["http://localhost:3000", "https://catchphrase-649dd.web.app"],
+		methods: ["GET", "POST"],
+	},
 });
 
-let roomList = [];
-const database = require('./database.json');
-let categories = [];
+let roomList: Room[] = [];
+let categories:string[] = [];
 database.words.forEach((phrase) => {
-  if (!categories.includes(phrase.category)) {
-    categories.push(phrase.category);
-  }
+	if (!categories.includes(phrase.category)) {
+		categories.push(phrase.category);
+	}
 });
 console.log('categories', categories);
 const default_filters = categories.map((category) => {return {name: category, active: true}});
@@ -140,7 +141,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  const handleJoinRoom = (name, roomCode) => {
+  const handleJoinRoom = (name: string, roomCode: string) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (!room) {
       room = {
@@ -174,19 +175,19 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit('room_updated', room);
   }
 
-  const removeUserFromRoom = (roomIndex) => {
+  const removeUserFromRoom = (roomIndex: number) => {
     console.log('socket.id', socket.id);
     socket.emit('room_left');
     socket.leave(roomList[roomIndex].code);
 
-    const teamOneIndex = roomList[roomIndex].teamOne.findIndex((player) => player.id === socket.id);
+    const teamOneIndex = roomList[roomIndex].teamOne.findIndex((player: Player) => player.id === socket.id);
     console.log('teamOneIndex', teamOneIndex);
     if (teamOneIndex >= 0) {
       roomList[roomIndex].teamOne.splice(teamOneIndex, 1);
       console.log(roomList);
       io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
     }
-    const teamTwoIndex = roomList[roomIndex].teamTwo.findIndex((player) => player.id === socket.id);
+    const teamTwoIndex = roomList[roomIndex].teamTwo.findIndex((player: Player) => player.id === socket.id);
     if (teamTwoIndex >= 0) {
       roomList[roomIndex].teamTwo.splice(teamTwoIndex, 1);
       console.log(roomList);
@@ -204,7 +205,7 @@ server.listen(443, () => {
   console.log("SERVER IS RUNNING");
 });
 
-function findNextPlayerIndex(players, startIndex) {
+function findNextPlayerIndex(players: Player[], startIndex: number) {
   let playerIndex = startIndex + 1;
   while (!players[playerIndex]) {
     if (playerIndex >= players.length) {
@@ -216,9 +217,9 @@ function findNextPlayerIndex(players, startIndex) {
   return playerIndex;
 }
 
-function newWord(filters) {
-  let validCategories = filters.filter((filter) => filter.active);
-  validCategories = validCategories.map((category) => category.name);
+function newWord(filters: Category[]) {
+  const filteredCategories = filters.filter((filter) => filter.active);
+  const validCategories = filteredCategories.map((category) => category.name);
 
   const phrases = database.words.filter((phrase) => validCategories.includes(phrase.category));
   const count = phrases.length;
@@ -228,7 +229,7 @@ function newWord(filters) {
   return phrases[wordIndex];
 }
 
-function makeCode(length) {
+function makeCode(length: number) {
   var result           = '';
   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   var charactersLength = characters.length;
@@ -238,7 +239,7 @@ function makeCode(length) {
   return result;
 }
 
-function getBaffledTimer(length) {
+function getBaffledTimer(length: number) {
   const plusOrMinus = Math.random() < 0.5 ? -1 : 1;
   const fifthOfLength = length / 5;
 
