@@ -118,13 +118,18 @@ io.on("connection", (socket) => {
   socket.on("next_turn", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room && room.teamOne.length > 0 && room.teamTwo.length > 0) {
-      room.turn.team = room.turn.team === 1 ? 2 : 1;
 
       if (room.turn.team === 1) {
         room.teamOnePlayerIndex = findNextPlayerIndex(room.teamOne, room.teamOnePlayerIndex);
-        room.turn.player = room.teamOne[room.teamOnePlayerIndex].name;
       } else {
         room.teamTwoPlayerIndex = findNextPlayerIndex(room.teamTwo, room.teamTwoPlayerIndex);
+      }
+
+      room.turn.team = room.turn.team === 1 ? 2 : 1;
+
+      if (room.turn.team === 1) {
+        room.turn.player = room.teamOne[room.teamOnePlayerIndex].name;
+      } else {
         room.turn.player = room.teamTwo[room.teamTwoPlayerIndex].name;
       }
 

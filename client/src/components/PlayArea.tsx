@@ -31,6 +31,16 @@ const PlayArea: React.FC<IProps> = (props: IProps) => {
 	const isMyTeamsTurn = (props.room?.turn.team === 1 && isTeamOne) || (props.room?.turn.team === 2 && isTeamTwo);
 	const winningTeam = props.room?.previousTurn.winningTeam;
 	const myTeamWonRound = (winningTeam === 1 && isTeamOne) || (winningTeam === 2 && isTeamTwo);
+	const isMyTurnNext = () => {
+		if (!isMyTeamsTurn) {
+			const players = isTeamOne ? props.room?.teamOne : props.room?.teamTwo;
+			const playerIndex = players?.findIndex((player) => player.name === props.name);
+
+			const nextIndex = isTeamOne ? props.room?.teamOnePlayerIndex : props.room?.teamTwoPlayerIndex;
+			return playerIndex === nextIndex;
+		}
+		return false;
+	}
 
 	return (
 		<div>
@@ -75,7 +85,7 @@ const PlayArea: React.FC<IProps> = (props: IProps) => {
 			)}
 
 			{(!isMyTurn && !props.isRoundStarted) && (
-				<h3 className="text-center text-secondary mt-4">Waiting for round to start . . .</h3>
+				<h3 className="text-center text-secondary mt-4">{`Waiting for ${props.currentPlayer} to start the round . . .`}</h3>
 			)}
 
 			{(!isMyTurn && isMyTeamsTurn && props.isRoundStarted) && (
@@ -83,7 +93,12 @@ const PlayArea: React.FC<IProps> = (props: IProps) => {
 			)}
 
 			{(!isMyTurn && !isMyTeamsTurn && props.isRoundStarted) && (
-				<h3 className="text-center text-secondary mt-4">Other Team's Turn . . .</h3>
+				<>
+					<h3 className="text-center text-secondary mt-4">Other Team's Turn . . .</h3>
+					{isMyTurnNext() &&
+						<h2 className="text-center text-primary mt-4">Get Ready! You're up next 🤗</h2>
+					}
+				</>
 			)}
 		</div>
 	);
