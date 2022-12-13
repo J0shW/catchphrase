@@ -97,7 +97,8 @@ io.on("connection", (socket) => {
   socket.on("start_timer", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room) {
-      room.turn.phrase = newWord(room.filters);
+      room.previousWords.push(room.turn.phrase.word);
+      room.turn.phrase = newWord(room.filters, room.previousWords);
       room.timerDate = Date.now();
       console.log('timer started', room);
       io.to(roomCode).emit('room_updated', room);
@@ -124,7 +125,7 @@ io.on("connection", (socket) => {
   socket.on("skip", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
     if (room) {
-      room.turn.phrase = newWord(room.filters);
+      room.turn.phrase = newWord(room.filters, room.previousWords);
       io.to(roomCode).emit('room_updated', room);
     }
   });
@@ -152,7 +153,8 @@ io.on("connection", (socket) => {
         room.turn.player = room.teamTwo[room.teamTwoPlayerIndex].name;
       }
 
-      room.turn.phrase = newWord(room.filters);
+      room.previousWords.push(room.turn.phrase.word);
+      room.turn.phrase = newWord(room.filters, room.previousWords);
     }
   }
 
@@ -172,8 +174,9 @@ io.on("connection", (socket) => {
         baffledTimer: getBaffledTimer(60),
         timerDate: undefined,
         filters: default_filters,
-        turn: {team: 1, player: name, phrase: newWord(default_filters)},
-        previousTurn: {winningTeam: undefined, wordList: []}
+        turn: {team: 1, player: name, phrase: newWord(default_filters, [])},
+        previousTurn: {winningTeam: undefined, wordList: []},
+        previousWords: []
       }
       roomList = [...roomList, room];
     }
@@ -234,16 +237,26 @@ function findNextPlayerIndex(players: Player[], startIndex: number) {
   return playerIndex;
 }
 
-function newWord(filters: Category[]) {
+function newWord(filters: Category[], previousWords: string[]) {
+  console.log('prev', previousWords)
   const filteredCategories = filters.filter((filter) => filter.active);
   const validCategories = filteredCategories.map((category) => category.name);
 
   const phrases = database.words.filter((phrase) => validCategories.includes(phrase.category));
   const count = phrases.length;
 
-  const wordIndex = Math.floor(Math.random() * count);
-  console.log('word', phrases[wordIndex])
-  return phrases[wordIndex];
+  let wordIndex;
+  let word;
+  let loopCount = 0;
+  do {
+    loopCount++;
+    console.log('loopCount', loopCount);
+    wordIndex = Math.floor(Math.random() * count);
+    word = phrases[wordIndex];
+  } while (previousWords.includes(word.word) && loopCount < 30);
+  
+  console.log('word', word);
+  return word;
 }
 
 function makeCode(length: number) {

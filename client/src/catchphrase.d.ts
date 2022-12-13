@@ -3,16 +3,17 @@ interface Room {
 	hostPlayer: string;
 	teamOne: Player[];
 	teamTwo: Player[];
-	teamOneScore: number,
-    teamTwoScore: number,
-	teamOnePlayerIndex: number,
-    teamTwoPlayerIndex: number,
-    timerLength: number,
-    baffledTimer: number,
+	teamOneScore: number;
+    teamTwoScore: number;
+	teamOnePlayerIndex: number;
+    teamTwoPlayerIndex: number;
+    timerLength: number;
+    baffledTimer: number;
 	timerDate: number | undefined;
 	filters: Category[];
 	turn: Turn;
-	previousTurn: {winningTeam?: number, wordList: string[]}
+	previousTurn: {winningTeam?: number, wordList: string[]};
+	previousWords: string[];
 }
 
 interface Player {
