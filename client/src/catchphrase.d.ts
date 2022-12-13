@@ -17,7 +17,7 @@ interface Room {
 
 interface Player {
 	name: string;
-	id: string;
+	id?: string;
 }
 
 interface Turn {

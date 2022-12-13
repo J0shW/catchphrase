@@ -12,20 +12,28 @@ import LeaveRoomModal from "../components/LeaveRoomModal";
 interface IProps {
   	room?: Room;
 	setRoom: (room: Room | undefined) => void;
-	name?: string;
+	name: string;
 }
 
 const Game: React.FC<IProps> = (props: IProps) => {
 	const socket = useContext(SocketContext);
 	const navigate = useNavigate();
 
-	const [showLeaveRoomModal, setShowLeaveRoomModal] = useState(false);
+	const [leaveRoomPlayer, setLeaveRoomPlayer] = useState<Player | undefined>();
 	const [showHowToPlayModal, setShowHowToPlayModal] = useState(false);
 	const [showSettingsModal, setShowSettingsModal] = useState(false);
 	const [codeCopied, setCodeCopied] = useState(false);
 
+	const leaveRoomHelper = useCallback(() => {
+		console.log('leave helper', props.room?.code);
+		socket.emit("leave_room_helper", props.room?.code);
+	}, [props.room]);
+
 	useEffect(() => {
-		socket.on("room_left", () => props.setRoom(undefined));
+		socket.on("room_left", () => {
+			leaveRoomHelper();
+			props.setRoom(undefined);
+		});
 
 		socket.on("room_updated", (room: Room) => {
 			console.log('room', room);
@@ -80,7 +88,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 			<PlayArea name={props.name} room={props.room} isRoundStarted={isRoundStarted} currentPlayer={currentPlayer} />
 
 			<div className="d-flex flex-row justify-content-between align-items-center">
-				<Button variant="outline-secondary" type="button" onClick={() => setShowLeaveRoomModal(true)} disabled={props.room === undefined}>
+				<Button variant="outline-secondary" type="button" onClick={() => setLeaveRoomPlayer({name: props.name})} disabled={props.room === undefined}>
 					Leave Room
 				</Button>
 				<OverlayTrigger
@@ -100,7 +108,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 				</OverlayTrigger>
 			</div>
 
-			<LeaveRoomModal isVisible={showLeaveRoomModal} onClose={() => setShowLeaveRoomModal(false)} room={props.room} />
+			<LeaveRoomModal player={leaveRoomPlayer} onClose={() => setLeaveRoomPlayer(undefined)} room={props.room} />
 			<HowToPlayModal isVisible={showHowToPlayModal} onClose={() => setShowHowToPlayModal(false)} />
 			<SettingsModal isVisible={showSettingsModal} onClose={() => setShowSettingsModal(false)} room={props.room} />
 		</Container>

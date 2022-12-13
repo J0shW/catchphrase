@@ -54,11 +54,25 @@ io.on("connection", (socket) => {
     handleJoinRoom(name, roomCode);
   });
 
-  socket.on("leave_room", (roomCode) => {
+  socket.on("leave_room", ({roomCode, id}) => {
     const roomIndex = roomList.findIndex((room) => room.code === roomCode);
-    console.log('roomIndex', roomIndex);
+    console.log('roomIndex', roomIndex, id);
     if (roomIndex >= 0) {
-      removeUserFromRoom(roomIndex);
+      const socketId = id ?? socket.id;
+      console.log('remove socket.id', socketId);
+      removeUserFromRoom(roomIndex, socketId);
+      io.to(socketId).emit('room_left');
+    }
+  });
+
+  socket.on("leave_room_helper", (roomCode) => {
+    socket.leave(roomCode);
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log('disconnect: ', reason);
+    for (let i=0; i < roomList.length; i++) {
+      removeUserFromRoom(i, socket.id);
     }
   });
 
@@ -117,6 +131,11 @@ io.on("connection", (socket) => {
 
   socket.on("next_turn", (roomCode) => {
     let room = roomList.find((room) => room.code === roomCode);
+    changeTurn(room);
+    io.to(roomCode).emit('room_updated', room);
+  });
+
+  const changeTurn = (room?: Room) => {
     if (room && room.teamOne.length > 0 && room.teamTwo.length > 0) {
 
       if (room.turn.team === 1) {
@@ -134,17 +153,8 @@ io.on("connection", (socket) => {
       }
 
       room.turn.phrase = newWord(room.filters);
-      console.log('turn', room.turn)
-      io.to(roomCode).emit('room_updated', room);
     }
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log('disconnect: ', reason);
-    for (let i=0; i < roomList.length; i++) {
-     removeUserFromRoom(i);
-    }
-  });
+  }
 
   const handleJoinRoom = (name: string, roomCode: string) => {
     let room = roomList.find((room) => room.code === roomCode);
@@ -180,20 +190,22 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit('room_updated', room);
   }
 
-  const removeUserFromRoom = (roomIndex: number) => {
-    console.log('socket.id', socket.id);
-    socket.emit('room_left');
-    socket.leave(roomList[roomIndex].code);
-
-    const teamOneIndex = roomList[roomIndex].teamOne.findIndex((player: Player) => player.id === socket.id);
+  const removeUserFromRoom = (roomIndex: number, id: string) => {
+    const teamOneIndex = roomList[roomIndex].teamOne.findIndex((player: Player) => player.id === id);
     console.log('teamOneIndex', teamOneIndex);
     if (teamOneIndex >= 0) {
+      if (roomList[roomIndex].turn.team === 1 && roomList[roomIndex].turn.player === roomList[roomIndex].teamOne[teamOneIndex].name) {
+        changeTurn(roomList[roomIndex]);
+      }
       roomList[roomIndex].teamOne.splice(teamOneIndex, 1);
       console.log(roomList);
       io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
     }
-    const teamTwoIndex = roomList[roomIndex].teamTwo.findIndex((player: Player) => player.id === socket.id);
+    const teamTwoIndex = roomList[roomIndex].teamTwo.findIndex((player: Player) => player.id === id);
     if (teamTwoIndex >= 0) {
+      if (roomList[roomIndex].turn.team === 2 && roomList[roomIndex].turn.player === roomList[roomIndex].teamTwo[teamTwoIndex].name) {
+        changeTurn(roomList[roomIndex]);
+      }
       roomList[roomIndex].teamTwo.splice(teamTwoIndex, 1);
       console.log(roomList);
       io.to(roomList[roomIndex].code).emit('room_updated', roomList[roomIndex]);
