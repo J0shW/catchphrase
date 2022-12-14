@@ -27,7 +27,7 @@ database.words.forEach((phrase) => {
 	}
 });
 console.log('categories', categories);
-const default_filters = categories.map((category) => {return {name: category, active: true}});
+const default_filters = categories.map((category) => {return {name: category, active: category === 'Winter Holiday'}});
 
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
