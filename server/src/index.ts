@@ -27,7 +27,7 @@ database.words.forEach((phrase) => {
 	}
 });
 console.log('categories', categories);
-const default_filters = categories.map((category) => {return {name: category, active: category === 'Winter Holiday'}});
+const default_filters = categories.map((category) => {return {name: category, active: category !== 'Winter Holiday'}});
 
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
@@ -253,7 +253,7 @@ function newWord(filters: Category[], previousWords: string[]) {
     console.log('loopCount', loopCount);
     wordIndex = Math.floor(Math.random() * count);
     word = phrases[wordIndex];
-  } while (previousWords.includes(word.word) && loopCount < 30);
+  } while (previousWords.includes(word.word) && loopCount < 100);
   
   console.log('word', word);
   return word;
