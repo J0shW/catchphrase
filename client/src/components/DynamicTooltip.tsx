@@ -3,7 +3,6 @@ import { Tooltip } from "react-bootstrap";
 
 const DynamicTooltip = forwardRef<HTMLDivElement>((props: any, ref) => {
 	useEffect(() => {
-		console.log('updating!');
 		props.popper.scheduleUpdate();
 	}, [props.children, props.popper]);
 

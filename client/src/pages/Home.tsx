@@ -33,7 +33,7 @@ const Home: React.FC<IProps> = (props: IProps) => {
 
 	useEffect(() => {
 		socket.on("room_updated", (room: Room) => {
-			console.log('room', room);
+			// console.log('room', room);
 			props.setRoom(room);
 		});
 

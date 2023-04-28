@@ -36,7 +36,7 @@ const Game: React.FC<IProps> = (props: IProps) => {
 		});
 
 		socket.on("room_updated", (room: Room) => {
-			console.log('room', room);
+			// console.log('room', room);
 			props.setRoom(room);
 		});
 
